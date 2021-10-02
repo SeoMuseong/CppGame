@@ -1,11 +1,9 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QGraphicsscene>
-#include <QtWidgets/QGraphicsRectItem>
 #include <QtWidgets/QGraphicsview>
-#include <QtWidgets/QGraphicsPixmapItem>
 #include <QScreen>
-#include <random>
 #include "Consts.h"
+#include "CBoard.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,14 +14,8 @@ int main(int argc, char *argv[])
     QGraphicsScene scene;
     scene.setSceneRect(geometry);
 
-    std::random_device device;
-    std::mt19937 gen(device());
-    std::uniform_int_distribution<int> dis(0, 11);
+    CBoard board(&scene);
 
-    QPixmap pixmap(Consts::paths[dis(gen)].c_str());
-    QGraphicsPixmapItem item(pixmap);
-
-    scene.addItem(&item);
      
     QGraphicsView view(&scene);
     view.showFullScreen();

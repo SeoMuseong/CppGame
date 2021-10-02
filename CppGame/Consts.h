@@ -17,4 +17,8 @@ namespace Consts
     "D:\\VC\\CppGame\\images\\16.png",
     "D:\\VC\\CppGame\\images\\20.png"
     };
+
+    const int BOARD_LENGTH = 12;
+    const int BOARD_ITEM_SIZE = 60;
 }
+
