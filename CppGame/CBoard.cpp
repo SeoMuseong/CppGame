@@ -1,5 +1,6 @@
 #include "CBoard.h"
 #include "Consts.h"
+#include "CItem.h"
 #include <random>
 CBoard::CBoard(QGraphicsScene* scene)
 	:_scene(scene),
@@ -10,7 +11,7 @@ CBoard::CBoard(QGraphicsScene* scene)
 	_root.setY(scene->sceneRect().height() / 2 - Consts::BOARD_ITEM_SIZE * (Consts::BOARD_LENGTH / 2) );
 	for (int row = 0; row < Consts::BOARD_LENGTH; row++)
 	{
-		std::vector< QGraphicsPixmapItem*> rowItem(Consts::BOARD_LENGTH);
+		std::vector< CItem*> rowItem(Consts::BOARD_LENGTH);
 		_items.push_back(rowItem);
 		for (int column = 0; column < Consts::BOARD_LENGTH; column++)
 		{
@@ -35,9 +36,10 @@ void CBoard::addItem(int row, int column)
 {
 	std::uniform_int_distribution<int> dis(0, 11);
 
-	QPixmap pixmap(Consts::paths[dis(_gen)].c_str());
-	QPixmap scaled(pixmap.scaled(Consts::BOARD_ITEM_SIZE, Consts::BOARD_ITEM_SIZE));
-	QGraphicsPixmapItem *item = new QGraphicsPixmapItem(scaled, &_root);
+	auto& path = Consts::paths[dis(_gen)];
+
+	CItem* item = new CItem(path, row, column, &_root);
+
 	item->setPos(column * Consts::BOARD_ITEM_SIZE, row * Consts::BOARD_ITEM_SIZE);
 
 	_items[row][column] = item;
