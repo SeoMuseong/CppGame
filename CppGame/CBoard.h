@@ -4,9 +4,11 @@
 #include <QtWidgets/QGraphicsRectItem>
 #include <vector>
 #include <random>
-
+#include <set>
 #include "CItem.h"
 
+using MatchPair = std::pair<int, int>;
+using MatchSet = std::set<MatchPair>;
 
 class CBoard : public CItem::EventLister
 {
@@ -22,7 +24,12 @@ public:
 	void addItem(int row, int column);
 	void removeItem(int row, int column);
 	void moveItem(CItem* item, int toRow, int toColumn);
-	void exchange(int row0, int column0, int row1, int column1);
+	void exchangeItems(int row0, int column0, int row1, int column1);
+
+	MatchSet matchedItems() const;
+	MatchSet matchedItems(int row, int column) const;
+	MatchSet matchedItemsHorizontal(int row, int column) const;
+	MatchSet matchedItemsVertical(int row, int column) const;
 
 	virtual void itemDragEvent(CItem* item, CItem::Direction dir);
 };

@@ -20,6 +20,11 @@ CBoard::CBoard(QGraphicsScene* scene)
 		}
 	}
 
+	for (const MatchPair& pair : matchedItems())
+	{
+		qDebug() << pair.first << " : " << pair.second;
+	}
+
 }
 
 CBoard::~CBoard()
@@ -70,13 +75,112 @@ void CBoard::moveItem(CItem* item, int toRow, int toColumn)
 	_items[toRow][toColumn] = item;
 }
 
-void CBoard::exchange(int row0, int column0, int row1, int column1)
+void CBoard::exchangeItems(int row0, int column0, int row1, int column1)
 {
 	CItem* item0 = _items[row0][column0];
 	CItem* item1 = _items[row1][column1];
 
 	moveItem(item0, row1, column1);
 	moveItem(item1, row0, column0);
+}
+
+MatchSet CBoard::matchedItems() const
+{
+	MatchSet matched;
+
+	for (int row = 0; row < _items.size(); row++)
+	{
+		for (int column = 0; column < _items[row].size(); column++)
+		{
+			MatchSet m = matchedItems(row, column);
+			if (m.size() >= 3)
+			{
+				matched.insert(m.begin(), m.end());
+			}
+		}
+	}
+	return matched;
+}
+
+MatchSet CBoard::matchedItems(int row, int column) const
+{
+	MatchSet horizontalMatched = matchedItemsHorizontal(row, column);
+	MatchSet verticalMatched = matchedItemsVertical(row, column);
+
+	MatchSet matched;
+
+	if (horizontalMatched.size() >= 3)
+		matched.insert(horizontalMatched.begin(), horizontalMatched.end());
+	if (verticalMatched.size() >= 3)
+		matched.insert(verticalMatched.begin(), verticalMatched.end());
+	
+	return matched;
+}
+
+MatchSet CBoard::matchedItemsHorizontal(int row, int column) const
+{
+	CItem* item = _items[row][column];
+	if (item == nullptr)
+		return {};
+
+	MatchSet leftMatched;
+	for (int i = column - 1; i >= 0; i--)
+	{
+		if (_items[row][i] && _items[row][i]->getPath() == item->getPath())
+			leftMatched.insert({ row, i });
+		else
+			break;
+	}
+	MatchSet rightMatched;
+	for (int i = column + 1; i < _items[row].size(); i++)
+	{
+		if (_items[row][i] && _items[row][i]->getPath() == item->getPath())
+			rightMatched.insert({ row, i });
+		else
+			break;
+	}
+
+	if (leftMatched.size() + rightMatched.size() + 1 >= 3)
+	{
+		leftMatched.insert({ row, column });
+		leftMatched.insert(rightMatched.begin(), rightMatched.end());
+		return leftMatched;
+	}
+	else
+		return {};
+}
+
+MatchSet CBoard::matchedItemsVertical(int row, int column) const
+{
+	CItem* item = _items[row][column];
+	if (item == nullptr)
+		return {};
+
+	MatchSet upMatched;
+	for (int i = row - 1; i >= 0; i--)
+	{
+		if (_items[i][column] && _items[i][column]->getPath() == item->getPath())
+			upMatched.insert({ i, column });
+		else
+			break;
+	}
+
+	MatchSet downMatched;
+	for (int i = row +1 ; i < _items.size(); i++)
+	{
+		if (_items[i][column] && _items[i][column]->getPath() == item->getPath())
+			downMatched.insert({ i, column });
+		else
+			break;
+	}
+	if (upMatched.size() + downMatched.size() + 1 >= 3)
+	{
+		upMatched.insert({ row, column });
+		upMatched.insert(downMatched.begin(), downMatched.end());
+		return upMatched;
+	}
+	else
+		return {};
 }
 
 void CBoard::itemDragEvent(CItem* item, CItem::Direction dir)
@@ -112,6 +216,6 @@ void CBoard::itemDragEvent(CItem* item, CItem::Direction dir)
 	if (item1 == nullptr)
 		return;
 
-	exchange(row0, column0, row1, column1);
+	exchangeItems(row0, column0, row1, column1);
 
 }
