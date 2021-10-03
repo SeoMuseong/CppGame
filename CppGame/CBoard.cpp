@@ -20,11 +20,7 @@ CBoard::CBoard(QGraphicsScene* scene)
 		}
 	}
 
-	for (const MatchPair& pair : matchedItems())
-	{
-		qDebug() << pair.first << " : " << pair.second;
-	}
-
+	while(refresh());
 }
 
 CBoard::~CBoard()
@@ -75,6 +71,13 @@ void CBoard::moveItem(CItem* item, int toRow, int toColumn)
 	_items[toRow][toColumn] = item;
 }
 
+void CBoard::moveItem(int fromRow, int fromColumn, int toRow, int toColumn)
+{
+	CItem* item = _items[fromRow][fromColumn];
+	if(item)
+		moveItem(item, toRow, toColumn);
+}
+
 void CBoard::exchangeItems(int row0, int column0, int row1, int column1)
 {
 	CItem* item0 = _items[row0][column0];
@@ -82,6 +85,53 @@ void CBoard::exchangeItems(int row0, int column0, int row1, int column1)
 
 	moveItem(item0, row1, column1);
 	moveItem(item1, row0, column0);
+}
+
+bool CBoard::refresh()
+{
+	MatchSet matched = matchedItems();
+	if (matched.size() < 3)
+		return false;
+
+	for (const auto& pair : matched)
+	{
+		removeItem(pair.first, pair.second);
+	}
+
+	// fill with existing items
+	for (int column = 0; column < _items[0].size(); column++)
+	{
+		for (int row = _items.size() -1 ; row >= 0; row--)
+		{
+			if (_items[row][column] != nullptr)
+				continue;
+			// _items[row][column] = nullptr;
+			for (int i = row - 1; i >= 0; i--)
+			{
+				if (_items[i][column] != nullptr)
+				{
+					moveItem(i, column, row, column);
+					_items[i][column] = nullptr;
+					break;
+				}
+			}
+		}
+	}
+
+	// fill with new items
+	for (int column = 0; column < _items[0].size(); column++)
+	{
+		for (int row = 0; row < _items.size(); row++)
+		{
+			if (_items[row][column] == nullptr)
+			{
+				addItem(row, column);
+			}
+			else
+				break;
+		}
+	}
+	return true;
 }
 
 MatchSet CBoard::matchedItems() const
@@ -217,5 +267,5 @@ void CBoard::itemDragEvent(CItem* item, CItem::Direction dir)
 		return;
 
 	exchangeItems(row0, column0, row1, column1);
-
+	while (refresh());
 }

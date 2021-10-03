@@ -24,7 +24,9 @@ public:
 	void addItem(int row, int column);
 	void removeItem(int row, int column);
 	void moveItem(CItem* item, int toRow, int toColumn);
+	void moveItem(int fromRow, int fromColumn, int toRow, int toColumn);
 	void exchangeItems(int row0, int column0, int row1, int column1);
+	bool refresh();
 
 	MatchSet matchedItems() const;
 	MatchSet matchedItems(int row, int column) const;
